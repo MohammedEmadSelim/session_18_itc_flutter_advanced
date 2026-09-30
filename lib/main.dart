@@ -1,6 +1,49 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:session_18_itc_flutter_advanced/models/user.dart';
 
-void main() {
+late Box<NewUser> usersBox;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  /// hive steps 4-5
+  await Hive.initFlutter();
+  Hive.registerAdapter(NewUserAdapter());
+  usersBox = await Hive.openBox("users");
+
+
+  /// fetch data
+  List data = await getUsers();
+  var x = data.map((e) {
+    return NewUser.fromJson(e);
+  }).toList();
+
+  usersBox.add(x[11]);
+  usersBox.put(x[5].id, x[5]);
+  usersBox.containsKey(0);
+  usersBox.delete(3);
+
+  print(usersBox.keys);
+
+  //======================================================
+  // SharedPreferences mrBably = await SharedPreferences.getInstance();
+  //
+  //
+  // SharedPreferencesWithCache mrBably2 = await SharedPreferencesWithCache.create(cacheOptions: SharedPreferencesWithCacheOptions());
+  // mrBably2.setString(key, value)
+  // mrBably.setString("name", "Sama");
+  // mrBably.setInt("`age`", 21);
+  // mrBably.setDouble("`score`", 3.7);
+  // //
+  // //==============================
+  // mrBably2.getString(key)
+  // print(mrBably.getString("name"));
+  // print(mrBably.getInt("`age`"));
+  // print(mrBably.getDouble("`score`"));
+
+
   runApp(const MyApp());
 }
 
@@ -80,7 +123,10 @@ class _MyHomePageState extends State<MyHomePage> {
         // TRY THIS: Try changing the color here to a specific color (to
         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
         // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme
+            .of(context)
+            .colorScheme
+            .inversePrimary,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
@@ -107,7 +153,10 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text('You have pushed the button this many times:'),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+              style: Theme
+                  .of(context)
+                  .textTheme
+                  .headlineMedium,
             ),
           ],
         ),
@@ -119,4 +168,15 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+}
+
+
+///  not for explain
+
+Future<List> getUsers() async {
+  var dio = Dio();
+
+  var data = await dio.get("https://dummyjson.com/users");
+
+  return data.data['users'];
 }
